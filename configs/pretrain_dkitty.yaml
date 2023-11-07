@@ -1,0 +1,130 @@
+seed_everything: 42
+
+# ---------------------------- TRAINER -------------------------------------------
+trainer:
+  default_root_dir: ${oc.env:OUTPUT_DIR,/tmp/pretrain_dkitty}
+
+  precision: 16
+
+  gpus: null
+  num_nodes: 1
+  accelerator: gpu
+  strategy: ddp_find_unused_parameters_false
+
+  max_steps: 10000
+  val_check_interval: 1000
+  enable_progress_bar: true
+
+  sync_batchnorm: True
+  enable_checkpointing: True
+  resume_from_checkpoint: null
+
+  # debugging
+  fast_dev_run: false
+
+  logger:
+    class_path: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+    init_args:
+      save_dir: ${trainer.default_root_dir}
+      name: default/logs
+      version: null
+      log_graph: False
+      default_hp_metric: True
+      prefix: ""
+
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: "step"
+
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: "${trainer.default_root_dir}/default/checkpoints"
+        # monitor: "val/w_rmse" # name of the logged metric which determines when model is improving
+        # mode: "min" # "max" means higher metric value is better, can be also "min"
+        # save_top_k: 1 # save k best models (determined by above metric)
+        save_last: True # additionaly always save model from last epoch
+        every_n_train_steps: 1000
+        verbose: False
+        filename: "epoch_{epoch:03d}"
+        auto_insert_metric_name: False
+
+    # - class_path: pytorch_lightning.callbacks.EarlyStopping
+    #   init_args:
+    #     monitor: "val/w_rmse" # name of the logged metric which determines when model is improving
+    #     mode: "min" # "max" means higher metric value is better, can be also "min"
+    #     patience: 5 # how many validation epochs of not improving until training stops
+    #     min_delta: 0. # minimum change in the monitored metric needed to qualify as an improvement
+
+    - class_path: pytorch_lightning.callbacks.RichModelSummary
+      init_args:
+        max_depth: -1
+
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+
+# ---------------------------- MODEL -------------------------------------------
+model:
+  lr: 5e-4
+  beta_1: 0.9
+  beta_2: 0.99
+  weight_decay: 1e-5
+  warmup_iters: 1000
+  max_iters: 15000
+  warmup_start_lr: 1e-8
+  eta_min: 1e-8
+  eval_pred: True
+  eval_optimize: True
+  condition_type: 1
+  n_samples: 256
+
+  net:
+    class_path: model.expt.ExPT
+    init_args:
+      task_name: 'dkitty'
+      d_model: 128
+      mlp_ratio: 4
+      nhead: 4
+      dropout: 0.1
+      activation: 'gelu'
+      norm_first: False
+      num_layers: 4
+      freeze_encoder: False
+      unconditioning: False
+      dim_z: 32
+      depth_vae: 4
+      hidden_vae: 512
+      vae_norm_first: True
+      learn_prior: False
+      beta_vae: 1.0
+      std_decoder: 0.5
+
+# ---------------------------- DATA -------------------------------------------
+data:
+  task: 'dkitty'
+  normalize_x_scheme: 'standardize'
+  normalize_y_scheme: 'standardize'
+  gp_type: {
+    'rbf': 'standard'
+  }
+  gp_args: {
+    'rbf': {
+      'kernel': 'rbf',
+      'prior_low': 5.0,
+      'prior_high': 10.0,
+      'scale_prior_low': 1.0,
+      'scale_prior_high': 10.0,
+    }
+  }
+  kernel_use_flag: '1'
+  num_ctx: 100
+  num_tar: 128
+  sample_x: False
+  noise_x: 0.1
+  device: 'cuda'
+  batch_size: 128
+  inner_batch_size: 128
+  eval_kernels: ['dkitty']
+  eval_data_ratio: 0.01
+  eval_samping_strategy: 'random'
+  eval_batch_size: 1
+  pin_memory: False
