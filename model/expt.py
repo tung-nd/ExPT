@@ -25,6 +25,8 @@ class ExPT(nn.Module):
         beta_vae=1.0,
         std_decoder=0.5
     ):
+        super(ExPT, self).__init__()
+        
         if task_name != 'tf10':
             task = design_bench.make(TASK_ABBREVIATIONS[task_name])
         else:
