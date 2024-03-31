@@ -19,6 +19,12 @@ conda env create -f env.yml
 conda activate expt
 ```
 
+The trickiest part in setting up the environment is to install `mujoco-py`. If the above script does not go through, you will have to install `mujoco-py` and then `design-bench` separately. I found the following sites particularly helpful for installing `mujoco-py`.
+- https://github.com/pytorch/rl/blob/main/knowledge_base/MUJOCO_INSTALLATION.md
+- https://github.com/openai/mujoco-py/issues/627
+- https://github.com/openai/mujoco-py/issues/323
+
+
 ## Pretraining
 
 To pretrain ExPT for the Ant domain, run
