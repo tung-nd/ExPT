@@ -1,4 +1,4 @@
-from gpytorch.kernels import ScaleKernel, RBFKernel, MaternKernel, PeriodicKernel, CosineKernel, LinearKernel, PiecewisePolynomialKernel, PolynomialKernel, RQKernel, SpectralMixtureKernel
+from gpytorch.kernels import ScaleKernel, RBFKernel, MaternKernel, PeriodicKernel, CosineKernel, LinearKernel, PolynomialKernel, RQKernel, SpectralMixtureKernel
 from design_bench.datasets.continuous.ant_morphology_dataset import AntMorphologyDataset
 from design_bench.datasets.continuous.dkitty_morphology_dataset import DKittyMorphologyDataset
 from design_bench.datasets.discrete.tf_bind_10_dataset import TFBind10Dataset
@@ -32,7 +32,6 @@ KERNEL_NAME_MAP = {
     'periodic': PeriodicKernel,
     'cosine': CosineKernel, # no length scale prior
     'linear': LinearKernel, # no length scale prior
-    'piecewise': PiecewisePolynomialKernel,
     'polynomial': PolynomialKernel, # no length scale prior,
     'rq': RQKernel,
     'mixture': SpectralMixtureKernel
